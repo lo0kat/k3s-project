@@ -1,0 +1,4 @@
+---
+- name: First step of K3S Server
+  debug:
+    msg: "This is a test"

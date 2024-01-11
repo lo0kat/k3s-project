@@ -1,0 +1,4 @@
+---
+- name: First step of K3S Agent
+  debug:
+    msg: "This is a test"
