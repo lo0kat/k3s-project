@@ -1,7 +1,21 @@
 ---
-- name: First step of prereq
-  debug:
-    msg: "This is a test"
+- name: Enable IPv4 forwarding
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: "1"
+    state: present
+    reload: true
+
+- name: Add br_netfilter to /etc/modules-load.d/
+  ansible.builtin.copy:
+    content: "br_netfilter"
+    dest: /etc/modules-load.d/br_netfilter.conf
+    mode: "u=rw,g=,o="
+
+- name: Load br_netfilter
+  community.general.modprobe:
+    name: br_netfilter
+    state: present
 
 - name: Make images directory
   ansible.builtin.file:
@@ -25,21 +39,11 @@
     group: root
     mode: 0755
 
-# If airgapped, all K3s artifacts are already on the node.
-- name: Download K3s install script
-  ansible.builtin.get_url:
-    url: https://get.k3s.io/
-    timeout: 120
+
+- name: Copy K3s install script
+  ansible.builtin.copy:
+    src: k3s-install.sh
     dest: /usr/local/bin/k3s-install.sh
     owner: root
     group: root
     mode: 0755
-
-# - name: Download K3s binary
-#   ansible.builtin.command:
-#     cmd: /usr/local/bin/k3s-install.sh
-#   environment:
-#     INSTALL_K3S_SKIP_START: "true"
-#     INSTALL_K3S_VERSION: "{{ k3s_version }}"
-#   changed_when: true
-
